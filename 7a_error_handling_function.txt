@@ -1,42 +1,22 @@
-from flask import Flask, render_template, request
-from EmotionDetection.emotion_detection import emotion_detector
+import requests
+import json
 
-app = Flask("Emotion Detector")
-
-@app.route("/")
-def render_index_page():
-    return render_template('index.html')
-
-@app.route("/emotionDetector")
-def send_emotion():
-    # Retrieve the text to analyze from the request arguments
-    text_to_analyze = request.args.get('textToAnalyze')
-
-    # Use the imported emotion_detector function
-    response = emotion_detector(text_to_analyze)
-
+def emotion_detector(text_to_analyse):
+    url='https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
+    myobj = { "raw_document": { "text": text_to_analyse } }
+    header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
+    response = requests.post(url, json = myobj, headers=header)
     if response.status_code == 400:
-        return (
-            "For the given statement, the system response is "
-            "'anger': None, 'disgust': None, 'fear': None, 'joy': None "
-            "and 'sadness': None. The dominant emotion is None."
-        )
-
-    # 1. Extract the dominant emotion (removes it from the dict)
-    dominant = response.pop("dominant_emotion")
-    
-    # 2. Format the remaining items (anger, disgust, etc.)
-    # Note: Use 'response' here, as that is the variable name defined above
-    parts = [f"'{k}': {v}" for k, v in response.items()]
-    
-    # 3. Create the grammar-friendly list: "a, b, and c"
-    formatted_scores = ", ".join(parts[:-1]) + f" and {parts[-1]}"
-    
-    # 4. Construct the final string
-    output = (f"For the given statement, the system response is {formatted_scores}. "
-              f"The dominant emotion is {dominant}.")
-
-    return output
-
-if __name__ == "__main__":
-    app.run(host="0.0p.0.0", port=5000)
+        return {
+            "anger": None, 
+            "disgust": None, 
+            "fear": None, 
+            "joy": None, 
+            "sadness": None, 
+            "dominant_emotion": None
+        }
+    formatted_response = json.loads(response.text)
+    emotion = formatted_response['emotionPredictions'][0]['emotion']
+    dominant_key = max(emotion, key=emotion.get)
+    emotion['dominant_emotion'] = dominant_key
+    return emotion
