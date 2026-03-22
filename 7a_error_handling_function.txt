@@ -24,9 +24,6 @@ def send_emotion():
 
     # 1. Extract the dominant emotion (removes it from the dict)
     dominant = response.pop("dominant_emotion")
-
-    if dominant is None:
-        return "Invalid text! Please try again!"
     
     # 2. Format the remaining items (anger, disgust, etc.)
     # Note: Use 'response' here, as that is the variable name defined above
