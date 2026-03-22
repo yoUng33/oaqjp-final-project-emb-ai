@@ -15,13 +15,6 @@ def send_emotion():
     # Use the imported emotion_detector function
     response = emotion_detector(text_to_analyze)
 
-    if response.status_code == 400:
-        return (
-            "For the given statement, the system response is "
-            "'anger': None, 'disgust': None, 'fear': None, 'joy': None "
-            "and 'sadness': None. The dominant emotion is None."
-        )
-
     # 1. Extract the dominant emotion (removes it from the dict)
     dominant = response.pop("dominant_emotion")
 
@@ -42,4 +35,4 @@ def send_emotion():
     return output
 
 if __name__ == "__main__":
-    app.run(host="0.0p.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000)
